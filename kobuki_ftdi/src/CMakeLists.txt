@@ -34,5 +34,5 @@ target_link_libraries(unflasher usb ftdi)
 
 install(TARGETS ftdi_scan ftdi_kobuki ftdi_read_eeprom ftdi_write_eeprom find_devices
                 get_serial_number flasher reset_device overwrite_serial_number unflasher
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION bin
 )

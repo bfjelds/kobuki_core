@@ -48,6 +48,10 @@ bool PacketFinder::checkSum()
  ** Implementation [Initialisation]
  *****************************************************************************/
 
+#ifdef _MSC_VER
+#include <limits>
+#endif
+
 Kobuki::Kobuki() :
     shutdown_requested(false)
     , is_enabled(false)
@@ -55,7 +59,11 @@ Kobuki::Kobuki() :
     , is_alive(false)
     , version_info_reminder(0)
     , controller_info_reminder(0)
-    , heading_offset(0.0/0.0)
+#ifdef _MSC_VER
+    , heading_offset(std::numeric_limits<double>::quiet_NaN())
+#else
+    , heading_offset(0.0 / 0.0)
+#endif
     , velocity_commands_debug(4, 0)
 {
 }

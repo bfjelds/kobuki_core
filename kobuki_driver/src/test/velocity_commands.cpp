@@ -14,6 +14,9 @@
 #include <iostream>
 #include <cstdio>
 #include <cmath>
+#ifdef _MSC_VER
+#include <algorithm>
+#endif // _MSC_VER
 
 double bias, radius, speed;
 
