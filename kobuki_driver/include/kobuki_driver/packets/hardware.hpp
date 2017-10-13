@@ -61,7 +61,7 @@ public:
     buildVariable(header_id, byteStream);
     buildVariable(length_packed, byteStream);
     if( header_id != Header::Hardware ) return false;
-    if( length_packed != 2 and length_packed != 4) return false;
+    if( length_packed != 2 && length_packed != 4) return false;
 
     // TODO First 3 firmware versions coded version number on 2 bytes, so we need convert manually to our new
     // 4 bytes system; remove this horrible, dirty hack as soon as we upgrade the firmware to 1.1.2 or 1.2.0
