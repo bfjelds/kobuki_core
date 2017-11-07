@@ -19,7 +19,21 @@
 
 #include <stdint.h>
 #include <vector>
+
+#define ROS2
+#ifdef ROS2
+#include "rclcpp/rclcpp.hpp"
+#include <kobuki_msgs/msg/bumper_event.hpp>
+#include <kobuki_msgs/msg/cliff_event.hpp>
+#include <kobuki_msgs/msg/led.hpp>
+#include <kobuki_msgs/msg/wheel_drop_event.hpp>
+#include <kobuki_msgs/msg/button_event.hpp>
+#include <kobuki_msgs/msg/power_system_event.hpp>
+#include <kobuki_msgs/msg/digital_input_event.hpp>
+#include <kobuki_msgs/msg/robot_state_event.hpp>
+#else
 #include <ecl/sigslots.hpp>
+#endif // ROS2
 
 #include "packets/core_sensors.hpp"
 #include "macros.hpp"
@@ -132,13 +146,23 @@ private:
   uint16_t          last_digital_input;
   RobotEvent::State last_robot_state;
 
-  ecl::Signal<const ButtonEvent&> sig_button_event;
+#ifdef ROS2
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::BumperEvent>> bumper_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::CliffEvent>> cliff_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::WheelDropEvent>> drop_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::ButtonEvent>> button_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::PowerSystemEvent>> power_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::DigitalInputEvent>> input_pub;
+  std::shared_ptr<rclcpp::Publisher<kobuki_msgs::msg::RobotStateEvent>> robot_pub;
+#else
   ecl::Signal<const BumperEvent&> sig_bumper_event;
   ecl::Signal<const CliffEvent&>  sig_cliff_event;
   ecl::Signal<const WheelEvent&>  sig_wheel_event;
+  ecl::Signal<const ButtonEvent&> sig_button_event;
   ecl::Signal<const PowerEvent&>  sig_power_event;
   ecl::Signal<const InputEvent&>  sig_input_event;
   ecl::Signal<const RobotEvent&>  sig_robot_event;
+#endif // ROS2
 };
 
 

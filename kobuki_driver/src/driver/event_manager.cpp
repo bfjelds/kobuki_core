@@ -15,6 +15,7 @@
 #include "../../include/kobuki_driver/modules/battery.hpp"
 #include "../../include/kobuki_driver/packets/core_sensors.hpp"
 
+
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
@@ -26,6 +27,16 @@ namespace kobuki {
 *****************************************************************************/
 
 void EventManager::init ( const std::string &sigslots_namespace ) {
+#ifdef ROS2
+  auto node = rclcpp::node::Node::make_shared("kobuki_sensors");
+  bumper_pub = node->create_publisher<kobuki_msgs::msg::BumperEvent>("events/bumper", rmw_qos_profile_sensor_data);
+  cliff_pub = node->create_publisher<kobuki_msgs::msg::CliffEvent>("events/cliff", rmw_qos_profile_sensor_data);
+  drop_pub = node->create_publisher<kobuki_msgs::msg::WheelDropEvent>("events/drop", rmw_qos_profile_sensor_data);
+  button_pub = node->create_publisher<kobuki_msgs::msg::ButtonEvent>("events/button", rmw_qos_profile_sensor_data);
+  power_pub = node->create_publisher<kobuki_msgs::msg::PowerSystemEvent>("events/power", rmw_qos_profile_sensor_data);
+  input_pub = node->create_publisher<kobuki_msgs::msg::DigitalInputEvent>("events/input", rmw_qos_profile_sensor_data);
+  robot_pub = node->create_publisher<kobuki_msgs::msg::RobotStateEvent>("events/robot", rmw_qos_profile_sensor_data);
+#else
   sig_button_event.connect(sigslots_namespace + std::string("/button_event"));
   sig_bumper_event.connect(sigslots_namespace + std::string("/bumper_event"));
   sig_cliff_event.connect(sigslots_namespace  + std::string("/cliff_event"));
@@ -33,6 +44,7 @@ void EventManager::init ( const std::string &sigslots_namespace ) {
   sig_power_event.connect(sigslots_namespace  + std::string("/power_event"));
   sig_input_event.connect(sigslots_namespace  + std::string("/input_event"));
   sig_robot_event.connect(sigslots_namespace  + std::string("/robot_event"));
+#endif // ROS2
 }
 
 /**
@@ -49,7 +61,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
     // Note that the touch pad means at most one button can be pressed
     // at a time.
-    ButtonEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::ButtonEvent event;
+#else
+	  ButtonEvent event;
+#endif // ROS2
 
     // Check changes in each button state's; even if this block of code
     // supports it, two buttons cannot be pressed simultaneously
@@ -60,7 +76,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = ButtonEvent::Released;
       }
-      sig_button_event.emit(event);
+#ifdef ROS2
+	  button_pub->publish(event);
+#else
+	  sig_button_event.emit(event);
+#endif // ROS2
     }
 
     if ((new_state.buttons ^ last_state.buttons) & CoreSensors::Flags::Button1) {
@@ -70,8 +90,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = ButtonEvent::Released;
       }
-      sig_button_event.emit(event);
-    }
+#ifdef ROS2
+	  button_pub->publish(event);
+#else
+	  sig_button_event.emit(event);
+#endif // ROS2
+	}
 
     if ((new_state.buttons ^ last_state.buttons) & CoreSensors::Flags::Button2) {
       event.button = ButtonEvent::Button2;
@@ -80,8 +104,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = ButtonEvent::Released;
       }
-      sig_button_event.emit(event);
-    }
+#ifdef ROS2
+	  button_pub->publish(event);
+#else
+	  sig_button_event.emit(event);
+#endif // ROS2
+	}
   }
 
   // ------------
@@ -90,7 +118,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
   if (last_state.bumper != new_state.bumper)
   {
-    BumperEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::BumperEvent event;
+#else
+	  BumperEvent event;
+#endif // ROS2
 
     // Check changes in each bumper state's and raise an event if so
     if ((new_state.bumper ^ last_state.bumper) & CoreSensors::Flags::LeftBumper) {
@@ -100,7 +132,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = BumperEvent::Released;
       }
-      sig_bumper_event.emit(event);
+#ifdef ROS2
+	  bumper_pub->publish(event);
+#else
+	  sig_bumper_event.emit(event);
+#endif // ROS2
+	  printf("BUMPER event event.state=%d \r\n", event.state);
     }
 
     if ((new_state.bumper ^ last_state.bumper) & CoreSensors::Flags::CenterBumper) {
@@ -110,7 +147,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = BumperEvent::Released;
       }
-      sig_bumper_event.emit(event);
+#ifdef ROS2
+	  bumper_pub->publish(event);
+#else
+	  sig_bumper_event.emit(event);
+#endif // ROS2
+	  printf("BUMPER event event.state=%d \r\n", event.state);
     }
 
     if ((new_state.bumper ^ last_state.bumper) & CoreSensors::Flags::RightBumper) {
@@ -120,7 +162,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = BumperEvent::Released;
       }
-      sig_bumper_event.emit(event);
+#ifdef ROS2
+	  bumper_pub->publish(event);
+#else
+	  sig_bumper_event.emit(event);
+#endif // ROS2
+	  printf("BUMPER event event.state=%d \r\n", event.state);
     }
   }
 
@@ -130,7 +177,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
   if (last_state.cliff != new_state.cliff)
   {
-    CliffEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::CliffEvent event;
+#else
+	  CliffEvent event;
+#endif // ROS2
 
     // Check changes in each cliff sensor state's and raise an event if so
     if ((new_state.cliff ^ last_state.cliff) & CoreSensors::Flags::LeftCliff) {
@@ -141,7 +192,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
         event.state = CliffEvent::Floor;
       }
       event.bottom = cliff_data[event.sensor];
-      sig_cliff_event.emit(event);
+#ifdef ROS2
+	  cliff_pub->publish(event);
+#else
+	  sig_cliff_event.emit(event);
+#endif // ROS2
+	  printf("CLIFF event event.state=%d \r\n", event.state);
     }
 
     if ((new_state.cliff ^ last_state.cliff) & CoreSensors::Flags::CenterCliff) {
@@ -152,8 +208,13 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
         event.state = CliffEvent::Floor;
       }
       event.bottom = cliff_data[event.sensor];
-      sig_cliff_event.emit(event);
-    }
+#ifdef ROS2
+	  cliff_pub->publish(event);
+#else
+	  sig_cliff_event.emit(event);
+#endif // ROS2
+	  printf("CLIFF event event.state=%d \r\n", event.state);
+	}
 
     if ((new_state.cliff ^ last_state.cliff) & CoreSensors::Flags::RightCliff) {
       event.sensor = CliffEvent::Right;
@@ -163,8 +224,13 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
         event.state = CliffEvent::Floor;
       }
       event.bottom = cliff_data[event.sensor];
-      sig_cliff_event.emit(event);
-    }
+#ifdef ROS2
+	  cliff_pub->publish(event);
+#else
+	  sig_cliff_event.emit(event);
+#endif // ROS2
+	  printf("CLIFF event event.state=%d \r\n", event.state);
+	}
   }
 
   // ------------
@@ -173,7 +239,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
   if (last_state.wheel_drop != new_state.wheel_drop)
   {
-    WheelEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::WheelDropEvent event;
+#else
+	  WheelEvent event;
+#endif // ROS2
 
     // Check changes in each wheel_drop sensor state's and raise an event if so
     if ((new_state.wheel_drop ^ last_state.wheel_drop) & CoreSensors::Flags::LeftWheel) {
@@ -183,8 +253,13 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = WheelEvent::Raised;
       }
-      sig_wheel_event.emit(event);
-    }
+#ifdef ROS2
+	  drop_pub->publish(event);
+#else
+	  sig_wheel_event.emit(event);
+#endif // ROS2
+	  printf("DROP event event.state=%d \r\n", event.state);
+	}
 
     if ((new_state.wheel_drop ^ last_state.wheel_drop) & CoreSensors::Flags::RightWheel) {
       event.wheel = WheelEvent::Right;
@@ -193,8 +268,13 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
       } else {
         event.state = WheelEvent::Raised;
       }
-      sig_wheel_event.emit(event);
-    }
+#ifdef ROS2
+	  drop_pub->publish(event);
+#else
+	  sig_wheel_event.emit(event);
+#endif // ROS2
+	  printf("DROP event event.state=%d \r\n", event.state);
+	}
   }
 
   // ------------
@@ -208,7 +288,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
     if (battery_last.charging_state != battery_new.charging_state)
     {
-      PowerEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::PowerSystemEvent event;
+#else
+	  PowerEvent event;
+#endif // ROS2
       switch (battery_new.charging_state)
       {
         case Battery::Discharging:
@@ -224,7 +308,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
             event.event = PowerEvent::PluggedToDockbase;
           break;
       }
-      sig_power_event.emit(event);
+#ifdef ROS2
+	  power_pub->publish(event);
+#else
+	  sig_power_event.emit(event);
+#endif // ROS2
     }
   }
 
@@ -235,7 +323,11 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
 
     if (battery_last.level() != battery_new.level())
     {
-      PowerEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::PowerSystemEvent event;
+#else
+	  PowerEvent event;
+#endif // ROS2
       switch (battery_new.level())
       {
         case Battery::Low:
@@ -247,8 +339,12 @@ void EventManager::update(const CoreSensors::Data &new_state, const std::vector<
         default:
           break;
       }
-      sig_power_event.emit(event);
-    }
+#ifdef ROS2
+	  power_pub->publish(event);
+#else
+	  sig_power_event.emit(event);
+#endif // ROS2
+	}
   }
 
   last_state = new_state;
@@ -262,14 +358,22 @@ void EventManager::update(const uint16_t &new_digital_input)
 {
   if (last_digital_input != new_digital_input)
   {
-    InputEvent event;
+#ifdef ROS2
+	  kobuki_msgs::msg::DigitalInputEvent event;
+#else
+	  InputEvent event;
+#endif // ROS2
 
     event.values[0] = new_digital_input&0x0001;
     event.values[1] = new_digital_input&0x0002;
     event.values[2] = new_digital_input&0x0004;
     event.values[3] = new_digital_input&0x0008;
 
-    sig_input_event.emit(event);
+#ifdef ROS2
+	input_pub->publish(event);
+#else
+	sig_input_event.emit(event);
+#endif // ROS2
 
     last_digital_input = new_digital_input;
   }
@@ -286,10 +390,18 @@ void EventManager::update(bool is_plugged, bool is_alive)
       (is_plugged && is_alive)?RobotEvent::Online:RobotEvent::Offline;
   if (last_robot_state != robot_state)
   {
-    RobotEvent event;
+#ifdef ROS2
+	kobuki_msgs::msg::RobotStateEvent event;
+#else
+	RobotEvent event;
+#endif // ROS2
     event.state = robot_state;
 
-    sig_robot_event.emit(event);
+#ifdef ROS2
+	robot_pub->publish(event);
+#else
+	sig_robot_event.emit(event);
+#endif // ROS2
 
     last_robot_state = robot_state;
   }
