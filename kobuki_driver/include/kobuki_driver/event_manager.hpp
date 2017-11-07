@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include <vector>
 
-#define ROS2
 #ifdef ROS2
 #include "rclcpp/rclcpp.hpp"
 #include <kobuki_msgs/msg/bumper_event.hpp>
