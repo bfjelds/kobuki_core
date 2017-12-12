@@ -28,7 +28,7 @@ namespace kobuki {
 
 void EventManager::init ( const std::string &sigslots_namespace ) {
 #ifdef ROS2
-  auto node = rclcpp::node::Node::make_shared("kobuki_sensors");
+  auto node = rclcpp::Node::make_shared("kobuki_sensors");
   bumper_pub = node->create_publisher<kobuki_msgs::msg::BumperEvent>("events/bumper", rmw_qos_profile_sensor_data);
   cliff_pub = node->create_publisher<kobuki_msgs::msg::CliffEvent>("events/cliff", rmw_qos_profile_sensor_data);
   drop_pub = node->create_publisher<kobuki_msgs::msg::WheelDropEvent>("events/drop", rmw_qos_profile_sensor_data);
